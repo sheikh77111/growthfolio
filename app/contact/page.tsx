@@ -1,162 +1,265 @@
-"use client"
+'use client';
 
-import type React from "react"
-
-import { useState } from "react"
-import Image from "next/image"
-import { ContactSection } from "@/components/contact-section"
+import { useState } from 'react';
+import { Mail, Phone, MapPin, Instagram, Linkedin, MessageCircle } from 'lucide-react';
+import Link from 'next/link';
 
 export default function ContactPage() {
   const [formData, setFormData] = useState({
-    name: "",
-    email: "",
-    message: "",
-  })
+    firstName: '',
+    lastName: '',
+    email: '',
+    message: '',
+  });
+  const [submitted, setSubmitted] = useState(false);
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    const { name, value } = e.target
-    setFormData((prev) => ({ ...prev, [name]: value }))
-  }
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
+  };
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault()
-    console.log("Form submitted:", formData)
-    alert("Thank you for your message! We'll get back to you soon.")
-    setFormData({
-      name: "",
-      email: "",
-      message: "",
-    })
-  }
+const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    try {
+      const res = await fetch('/api/contact', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ ...formData, type: 'contact' }),
+      });
+      if (res.ok) {
+        setSubmitted(true);
+        setFormData({ firstName: '', lastName: '', email: '', message: '' });
+        setTimeout(() => setSubmitted(false), 3000);
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const contactInfo = [
+    {
+      icon: Phone,
+      label: 'Phone',
+      value: '+91 87144 12695',
+      link: 'tel:+918714412695',
+    },
+    {
+      icon: Mail,
+      label: 'Email',
+      value: 'hellogrowthfolio@gmail.com',
+      link: 'mailto:hellogrowthfolio@gmail.com',
+    },
+    {
+      icon: MapPin,
+      label: 'Address',
+      value: 'Level 2, Venture Arcade, Mavoor Rd, above Croma, Thondayad, Kozhikode, Kerala 673016',
+      link: null,
+    },
+  ];
 
   return (
-    <main className="pt-20">
-      {/* Hero Contact Section */}
-      <section className="min-h-[80vh] bg-black text-white">
-        <div className="container mx-auto px-4 py-16">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-0 min-h-[60vh]">
-            {/* Left Side - Contact Information */}
-            <div className="flex flex-col justify-center p-8 lg:p-16">
-              <div className="mb-12">
-                <h1 className="text-4xl md:text-5xl lg:text-6xl font-hanson font-bold mb-6 leading-tight">
-                  CONTACT US.
-                </h1>
-                <h2 className="text-3xl md:text-4xl font-hanson font-bold mb-6">LET'S GROW TOGETHER!</h2>
-                <p className="text-lg text-gray-300 mb-12">
-                  Get in touch—our team will respond promptly to help you grow.
-                </p>
-              </div>
-
-              {/* Contact Locations */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
-                {/* Kochi Office */}
-                <div>
-                  <h3 className="text-2xl font-hanson font-bold mb-4">Calicut</h3>
-                  <div className="text-gray-300 space-y-1">
-                    <p>Calicut, Kerala,</p>
-                    <p>India 673639</p>
-                  </div>
-                  <div className="mt-6 space-y-2">
-                    <p className="text-white">growthfoliosmm@gmail.com</p>
-                    <p className="text-white">+91 87144 12695 </p>
-                  </div>
-                </div>
-
-                {/* London Office */}
-                <div>
-                  <h3 className="text-2xl font-hanson font-bold mb-4">Dubai</h3>
-                  <div className="text-gray-300 space-y-1">
-                    <p>UAE, Dubai</p>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* Right Side - Contact Image */}
-            <div className="relative h-[300px] lg:h-auto">
-              <Image
-                src="/images/contact1.jpg"
-                alt="Contact Us - Team Meeting"
-                fill
-                className="object-cover rounded-lg lg:rounded-none lg:rounded-r-lg"
-                priority
-              />
-            </div>
-          </div>
+    <>
+      {/* Page Header */}
+      <section className="py-12 md:py-20 bg-gradient-to-r from-primary to-secondary text-white">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+          <h1 className="text-4xl md:text-6xl font-bold mb-4 text-balance">Get In Touch</h1>
+          <p className="text-lg md:text-xl opacity-90 max-w-2xl mx-auto text-balance">
+            We'd love to hear about your project and discuss how we can help elevate your brand
+          </p>
         </div>
       </section>
 
-      {/* New Contact Form Section */}
-      <section className="py-16 bg-black">
-        <div className="container mx-auto px-4">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-            {/* Left Side - Empty Space */}
-            <div className="hidden lg:block"></div>
+      {/* Contact Section */}
+      <section className="py-16 md:py-24 bg-background">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-12">
+            {/* Contact Info */}
+            <div>
+              <h2 className="text-3xl font-bold mb-8 text-foreground">Contact Information</h2>
+              <div className="space-y-6">
+                {contactInfo.map((info, index) => {
+                  const Icon = info.icon;
+                  const isAddress = info.label === 'Address';
+                  const mapsLink = 'https://www.google.com/maps/place/Level+2,+Venture+Arcade,+Mavoor+Rd,+above+Croma,+Thondayad,+Kozhikode,+Kerala+673016/@11.2705,75.8057,17z';
+                  
+                  return (
+                    <div key={index} className="flex gap-4">
+                      <div className="flex-shrink-0">
+                        <Icon className="w-6 h-6 text-primary mt-1" />
+                      </div>
+                      <div>
+                        <p className="font-semibold text-foreground mb-1">{info.label}</p>
+                        {isAddress ? (
+                          <Link
+                            href={mapsLink}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-muted-foreground hover:text-primary transition-colors break-all underline"
+                          >
+                            {info.value}
+                          </Link>
+                        ) : info.link ? (
+                          <Link
+                            href={info.link}
+                            className="text-muted-foreground hover:text-primary transition-colors break-all"
+                          >
+                            {info.value}
+                          </Link>
+                        ) : (
+                          <p className="text-muted-foreground">{info.value}</p>
+                        )}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
 
-            {/* Right Side - Contact Form */}
-            <div className="bg-black text-white p-8 lg:p-12 rounded-lg">
-              <h2 className="text-3xl md:text-4xl font-hanson font-bold mb-4">
-                Reach Out Today—Let’s Kickstart Something Great!
-              </h2>
-              <p className="text-base text-gray-300 mb-8">
-                Let’s talk. We’ll follow up faster than your next notification.
-              </p>
+              {/* Social Links */}
+              <div className="mt-12">
+                <h3 className="font-semibold text-foreground mb-4">Follow Us</h3>
+                <div className="flex gap-6">
+              <Link
+                href="https://www.instagram.com/growth.folio?igsh=aHl4Zzgxd3YyeXds"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="bg-white border-2-primary rounded-lg p-3 hover:bg-primary hover: shadow-md transition-all flex items-center justify-center"
+                aria-label="Instagram"
+              >
+                <Instagram className="w-5 h-5 text-primary hover:text-white" />
+              </Link>
+              <Link
+                href="https://www.linkedin.com/company/growthfolio/"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="bg-white border-2-primary rounded-lg p-3 hover:bg-primary hover: shadow-md transition-all flex items-center justify-center"
+                aria-label="LinkedIn"
+              >
+                <Linkedin className="w-5 h-5 text-primary hover:text-white" />
+              </Link>
+              <Link
+                href="https://wa.me/918714412695"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="bg-white border-2-primary rounded-lg p-3 hover:bg-primary hover: shadow-md transition-all flex items-center justify-center"
+                aria-label="WhatsApp"
+              >
+                <MessageCircle className="w-6 h-6 text-primary hover:text-white" />
+              </Link>
+            </div>
+          </div>
+        </div>
 
-              <form onSubmit={handleSubmit} className="space-y-8">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+            {/* Contact Form */}
+            <div className="lg:col-span-2">
+              <form onSubmit={handleSubmit} className="bg-secondary/50 rounded-lg p-8 border border-border">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
                   <div>
+                    <label htmlFor="firstName" className="block text-sm font-semibold mb-2">
+                      First Name
+                    </label>
                     <input
                       type="text"
-                      name="name"
-                      placeholder="Name"
-                      value={formData.name}
+                      id="firstName"
+                      name="firstName"
+                      value={formData.firstName}
                       onChange={handleChange}
+                      className="w-full px-4 py-3 bg-background border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary text-foreground placeholder-muted-foreground"
+                      placeholder="John"
                       required
-                      className="w-full bg-transparent border-b-2 border-gray-600 py-3 px-0 text-white placeholder-gray-400 focus:outline-none focus:border-brand-green transition-colors"
                     />
                   </div>
                   <div>
+                    <label htmlFor="lastName" className="block text-sm font-semibold mb-2">
+                      Last Name
+                    </label>
                     <input
-                      type="email"
-                      name="email"
-                      placeholder="Email"
-                      value={formData.email}
+                      type="text"
+                      id="lastName"
+                      name="lastName"
+                      value={formData.lastName}
                       onChange={handleChange}
+                      className="w-full px-4 py-3 bg-background border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary text-foreground placeholder-muted-foreground"
+                      placeholder="Doe"
                       required
-                      className="w-full bg-transparent border-b-2 border-gray-600 py-3 px-0 text-white placeholder-gray-400 focus:outline-none focus:border-brand-green transition-colors"
                     />
                   </div>
                 </div>
 
-                <div>
-                  <textarea
-                    name="message"
-                    placeholder="Message"
-                    value={formData.message}
+                <div className="mb-6">
+                  <label htmlFor="email" className="block text-sm font-semibold mb-2">
+                    Email Address
+                  </label>
+                  <input
+                    type="email"
+                    id="email"
+                    name="email"
+                    value={formData.email}
                     onChange={handleChange}
+                    className="w-full px-4 py-3 bg-background border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary text-foreground placeholder-muted-foreground"
+                    placeholder="john@example.com"
                     required
-                    rows={5}
-                    className="w-full bg-transparent border-b-2 border-gray-600 py-3 px-0 text-white placeholder-gray-400 focus:outline-none focus:border-brand-green transition-colors resize-none"
                   />
                 </div>
 
-                <div>
-                  <button
-                    type="submit"
-                    className="inline-flex items-center gap-2 text-white hover:text-brand-green transition-colors text-sm font-medium"
-                  >
-                    <span className="w-2 h-2 bg-white rounded-full"></span>
-                    SEND MESSAGE
-                  </button>
+                <div className="mb-6">
+                  <label htmlFor="message" className="block text-sm font-semibold mb-2">
+                    Message
+                  </label>
+                  <textarea
+                    id="message"
+                    name="message"
+                    value={formData.message}
+                    onChange={handleChange}
+                    rows={5}
+                    className="w-full px-4 py-3 bg-background border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary text-foreground placeholder-muted-foreground resize-none"
+                    placeholder="Tell us about your project..."
+                    required
+                  />
                 </div>
+
+                <button
+                  type="submit"
+                  className="w-full bg-primary text-primary-foreground py-3 rounded-lg font-semibold hover:shadow-lg transition-all duration-300 hover:scale-105"
+                >
+                  Send Message
+                </button>
+
+                {submitted && (
+                  <div className="mt-4 p-4 bg-green-500/20 border border-green-500 rounded-lg text-green-700 text-center">
+                    Thank you! We'll get back to you soon.
+                  </div>
+                )}
               </form>
             </div>
           </div>
         </div>
       </section>
 
-      {/* Original Contact Section */}
-      <ContactSection />
-    </main>
-  )
+      {/* Map Section */}
+      <section className="py-16 md:py-24 bg-secondary/50">
+        <div className="w-full px-4 sm:px-6 lg:px-8">
+          <h2 className="text-3xl md:text-4xl font-bold mb-8 text-center text-balance">
+            Visit Our Location
+          </h2>
+          <div className="relative h-96 bg-secondary rounded-lg overflow-hidden border border-border">
+            <iframe
+              src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3911.3295!2d75.8013!3d11.2707!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3ba45d1b5d5d5d5d%3A0x123456789abc!2sLevel+2+Venture+Arcade+Mavoor+Rd+Croma+Thondayad+Kozhikode+673016!5e0!3m2!1sen!2sin!4v1708326400000"
+              width="100%"
+              height="100%"
+              style={{ border: 0 }}
+              allowFullScreen={true}
+              loading="lazy"
+              referrerPolicy="no-referrer-when-downgrade"
+              className="absolute inset-0"
+            />
+          </div>
+        </div>
+      </section>
+    </>
+  );
 }
